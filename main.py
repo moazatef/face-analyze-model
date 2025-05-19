@@ -12,6 +12,10 @@ app = FastAPI()
 MAX_FILE_SIZE_MB = 10  # 10 MB
 MAX_IMAGE_SIZE = (500, 500)  # Resize to 500x500
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @app.post("/analyze/")
 async def analyze_emotion(file: UploadFile = File(...)):
     try:
@@ -37,7 +41,7 @@ async def analyze_emotion(file: UploadFile = File(...)):
         # Ensure the image is in the correct color format (BGR)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-        # Analyze emotion, age, gender using DeepFace
+        # Analyze emotion using DeepFace
         result = DeepFace.analyze(img, actions=['emotion'], enforce_detection=False)
 
         # Convert emotion scores from float32 to native float
@@ -50,8 +54,3 @@ async def analyze_emotion(file: UploadFile = File(...)):
 
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
-
-    
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
